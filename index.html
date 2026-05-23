@@ -9,7 +9,6 @@
 <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700&family=Material+Symbols+Outlined:opsz,wght,FILL@20..48,100..700,0..1" rel="stylesheet">
 <style>
 :root {
-  /* M3 tokens */
   --md-sys-color-primary: #1a6b52;
   --md-sys-color-on-primary: #fff;
   --md-sys-color-primary-container: #a4f3d4;
@@ -41,7 +40,6 @@
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{height:100%;font-family:'Roboto',sans-serif;background:var(--md-sys-color-surface);color:var(--md-sys-color-on-surface);overflow:hidden}
 
-/* Layout */
 .app{display:flex;height:100vh;position:relative}
 #map{flex:1;z-index:0}
 
@@ -77,11 +75,12 @@ html,body{height:100%;font-family:'Roboto',sans-serif;background:var(--md-sys-co
 
 .list{flex:1;overflow-y:auto;padding:4px 8px 8px}
 
-/* Card — M3 filled card */
+/* Card — M3 */
 .card{
   display:flex;gap:12px;padding:12px;margin-bottom:4px;
   border-radius:var(--md-sys-shape-corner-m);cursor:pointer;
   transition:background .12s;border:none;background:transparent;
+  position:relative;
 }
 .card:hover{background:var(--md-sys-color-surface-container-low)}
 .card.on{background:var(--md-sys-color-primary-container)}
@@ -90,7 +89,8 @@ html,body{height:100%;font-family:'Roboto',sans-serif;background:var(--md-sys-co
   width:88px;height:66px;border-radius:var(--md-sys-shape-corner-m);
   object-fit:cover;flex-shrink:0;background:var(--md-sys-color-surface-container);
 }
-.card-body{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center}
+
+.card-main{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center}
 .card-price{font:var(--md-sys-typescale-title-medium);color:var(--md-sys-color-on-surface)}
 .card-price.sale{color:var(--md-sys-color-error)}
 .card-type{font:var(--md-sys-typescale-body-small);color:var(--md-sys-color-on-surface-variant);margin-top:1px}
@@ -106,6 +106,19 @@ html,body{height:100%;font-family:'Roboto',sans-serif;background:var(--md-sys-co
 .card-btn:hover{box-shadow:0 1px 3px var(--md-sys-color-shadow)}
 .card-btn .material-symbols-outlined{font-size:16px}
 
+.card-actions{
+  display:flex;gap:4px;flex-shrink:0;align-items:center;
+}
+.card-icon-btn{
+  width:36px;height:36px;border-radius:50%;border:none;
+  background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;
+  color:var(--md-sys-color-on-surface-variant);transition:all .12s;
+  font-size:20px;
+}
+.card-icon-btn:hover{background:var(--md-sys-color-surface-container);color:var(--md-sys-color-on-surface)}
+.card-icon-btn.liked{color:var(--md-sys-color-error)}
+.card-icon-btn.disliked{color:var(--md-sys-color-outline)}
+
 /* Popup — M3 */
 .leaflet-popup-content-wrapper{border-radius:var(--md-sys-shape-corner-l)!important;padding:0!important;overflow:hidden;box-shadow:0 4px 16px var(--md-sys-color-shadow)!important}
 .leaflet-popup-content{margin:0!important;width:256px!important}
@@ -117,14 +130,27 @@ html,body{height:100%;font-family:'Roboto',sans-serif;background:var(--md-sys-co
 .p-type{font:var(--md-sys-typescale-body-small);color:var(--md-sys-color-on-surface-variant);margin-top:2px}
 .p-loc{font:var(--md-sys-typescale-label-small);color:var(--md-sys-color-outline);margin-top:6px;display:flex;align-items:center;gap:2px}
 .p-loc .material-symbols-outlined{font-size:14px}
+.p-actions{
+  display:flex;gap:6px;justify-content:space-between;margin-top:12px;
+}
 .p-link{
   display:flex;align-items:center;justify-content:center;gap:4px;
-  margin-top:12px;height:36px;
+  flex:1;height:36px;
   background:var(--md-sys-color-primary);color:var(--md-sys-color-on-primary);
   text-decoration:none;border-radius:var(--md-sys-shape-corner-xl);
   font:var(--md-sys-typescale-label-large);transition:all .12s;
 }
 .p-link:hover{box-shadow:0 1px 3px var(--md-sys-color-shadow)}
+.p-icon-btn{
+  width:36px;height:36px;border-radius:50%;border:none;
+  background:var(--md-sys-color-surface-container);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  color:var(--md-sys-color-on-surface-variant);transition:all .12s;
+  font-size:18px;
+}
+.p-icon-btn:hover{background:var(--md-sys-color-surface-container-high);color:var(--md-sys-color-on-surface)}
+.p-icon-btn.liked{color:var(--md-sys-color-error);background:var(--md-sys-color-error-container)}
+.p-icon-btn.disliked{color:var(--md-sys-color-outline)}
 
 /* Marker */
 .mk{
@@ -181,7 +207,6 @@ html,body{height:100%;font-family:'Roboto',sans-serif;background:var(--md-sys-co
   .bottom-sheet{display:none}
 }
 
-/* Leaflet overrides */
 .leaflet-control-zoom{border:none!important;box-shadow:0 2px 8px var(--md-sys-color-shadow)!important;border-radius:var(--md-sys-shape-corner-m)!important;overflow:hidden}
 .leaflet-control-zoom a{background:var(--md-sys-color-surface)!important;color:var(--md-sys-color-on-surface)!important;border:none!important;width:40px!important;height:40px!important;line-height:40px!important;font-size:18px!important}
 .leaflet-control-zoom a:hover{background:var(--md-sys-color-surface-container)!important}
@@ -191,7 +216,6 @@ html,body{height:100%;font-family:'Roboto',sans-serif;background:var(--md-sys-co
 <div class="app">
   <div id="map"></div>
 
-  <!-- Desktop sidebar -->
   <div class="sidebar">
     <div class="sidebar-head">
       <h1>Избранное</h1>
@@ -206,7 +230,6 @@ html,body{height:100%;font-family:'Roboto',sans-serif;background:var(--md-sys-co
     <div class="list" id="list"></div>
   </div>
 
-  <!-- Mobile bottom sheet -->
   <div class="bottom-sheet collapsed" id="bs">
     <div class="bs-handle" id="bsHandle"><div class="bs-handle-bar"></div></div>
     <div class="bs-head">
@@ -249,6 +272,30 @@ const D=[
 {i:'6256108',t:'4-bed apartment',p:'€4,000',l:'Germasogeia',lat:34.69306,lng:33.08058,u:'https://www.bazaraki.com/adv/6256108_4-bedroom-apartment-to-rent/',img:'https://cdn1.bazaraki.com/media/cache1/b6/70/b6707d540ff9b691ac3f268dcf47f51f.webp'}
 ];
 
+// LocalStorage для like/dislike
+var votes=JSON.parse(localStorage.getItem('bazaraki_votes')||'{}');
+
+function vote(id,val){
+  votes[id]=val;
+  localStorage.setItem('bazaraki_votes',JSON.stringify(votes));
+  updateVoteButtons(id);
+}
+
+function updateVoteButtons(id){
+  var v=votes[id];
+  var likeBtns=document.querySelectorAll('[data-vote-id="'+id+'"][data-vote="like"]');
+  var dislikeBtns=document.querySelectorAll('[data-vote-id="'+id+'"][data-vote="dislike"]');
+  
+  likeBtns.forEach(function(b){
+    if(v===1) b.classList.add('liked');
+    else b.classList.remove('liked');
+  });
+  dislikeBtns.forEach(function(b){
+    if(v===-1) b.classList.add('disliked');
+    else b.classList.remove('disliked');
+  });
+}
+
 /* Map */
 const map=L.map('map',{zoomControl:false}).setView([34.688,33.07],13);
 L.control.zoom({position:'bottomright'}).addTo(map);
@@ -261,14 +308,22 @@ let markers=[];
 let filtered=[...D];
 const isMobile=()=>window.innerWidth<=768;
 
-function cardHTML(d,where){
-  const s=d.sale?' sale':'';
+function cardHTML(d){
+  var s=d.sale?' sale':'';
   return '<img class="card-img" src="'+d.img+'" onerror="this.style.background=\'var(--md-sys-color-surface-container)\'">'+
-    '<div class="card-body">'+
+    '<div class="card-main">'+
       '<div class="card-price'+s+'">'+d.p+'</div>'+
       '<div class="card-type">'+d.t+'</div>'+
       '<div class="card-loc"><span class="material-symbols-outlined">location_on</span>'+d.l+'</div>'+
       '<a href="'+d.u+'" target="_blank" class="card-btn" onclick="event.stopPropagation()"><span class="material-symbols-outlined">open_in_new</span>Bazaraki</a>'+
+    '</div>'+
+    '<div class="card-actions">'+
+      '<button class="card-icon-btn" data-vote-id="'+d.i+'" data-vote="like" onclick="event.stopPropagation(); vote(\''+d.i+'\',1); updateVoteButtons(\''+d.i+'\');" title="Like">'+
+        '<span class="material-symbols-outlined">thumb_up</span>'+
+      '</button>'+
+      '<button class="card-icon-btn" data-vote-id="'+d.i+'" data-vote="dislike" onclick="event.stopPropagation(); vote(\''+d.i+'\',-1); updateVoteButtons(\''+d.i+'\');" title="Dislike">'+
+        '<span class="material-symbols-outlined">thumb_down</span>'+
+      '</button>'+
     '</div>';
 }
 
@@ -289,14 +344,21 @@ function render(){
         '<div class="p-price'+(d.sale?' sale':'')+'">'+d.p+'</div>'+
         '<div class="p-type">'+d.t+'</div>'+
         '<div class="p-loc"><span class="material-symbols-outlined">location_on</span>'+d.l+'</div>'+
-        '<a href="'+d.u+'" target="_blank" class="p-link"><span class="material-symbols-outlined" style="font-size:16px">open_in_new</span> Открыть на Bazaraki</a>'+
+        '<div class="p-actions">'+
+          '<a href="'+d.u+'" target="_blank" class="p-link"><span class="material-symbols-outlined" style="font-size:16px">open_in_new</span> Открыть</a>'+
+          '<button class="p-icon-btn" data-vote-id="'+d.i+'" data-vote="like" onclick="vote(\''+d.i+'\',1); updateVoteButtons(\''+d.i+'\');" style="margin:0;" title="Like">'+
+            '<span class="material-symbols-outlined">thumb_up</span>'+
+          '</button>'+
+          '<button class="p-icon-btn" data-vote-id="'+d.i+'" data-vote="dislike" onclick="vote(\''+d.i+'\',-1); updateVoteButtons(\''+d.i+'\');" style="margin:0;" title="Dislike">'+
+            '<span class="material-symbols-outlined">thumb_down</span>'+
+          '</button>'+
+        '</div>'+
       '</div></div>'
     );
 
     var marker=L.marker([d.lat,d.lng],{icon:icon}).addTo(map).bindPopup(popup);
 
     marker.on('click',function(){
-      var sel=isMobile()?'#listM':'#list';
       document.querySelectorAll('.card').forEach(function(c){c.classList.remove('on')});
       var card=document.getElementById((isMobile()?'m':'d')+d.i);
       if(card){card.classList.add('on');card.scrollIntoView({behavior:'smooth',block:'nearest'})}
@@ -306,9 +368,7 @@ function render(){
     markers.push(marker);
   });
 
-  // Desktop list
   renderList(document.getElementById('list'),'d');
-  // Mobile list
   renderList(document.getElementById('listM'),'m');
 
   var n=filtered.length;
@@ -317,6 +377,9 @@ function render(){
   document.getElementById('cntM').textContent=n;
 
   if(markers.length>0) map.fitBounds(L.featureGroup(markers).getBounds().pad(0.06));
+  
+  // Update vote buttons
+  filtered.forEach(function(d){updateVoteButtons(d.i)});
 }
 
 function renderList(container,prefix){
@@ -325,7 +388,7 @@ function renderList(container,prefix){
     var card=document.createElement('div');
     card.className='card';
     card.id=prefix+d.i;
-    card.innerHTML=cardHTML(d,prefix);
+    card.innerHTML=cardHTML(d);
     card.addEventListener('click',function(){
       map.setView([d.lat,d.lng],16,{animate:true});
       markers[idx].openPopup();
@@ -338,18 +401,22 @@ function renderList(container,prefix){
   });
 }
 
-// Search
-function onSearch(e){
+document.getElementById('q').addEventListener('input',function(e){
   var q=e.target.value.toLowerCase();
   filtered=D.filter(function(d){
     return d.l.toLowerCase().indexOf(q)>-1||d.t.toLowerCase().indexOf(q)>-1||d.p.toLowerCase().indexOf(q)>-1;
   });
   render();
-}
-document.getElementById('q').addEventListener('input',onSearch);
-document.getElementById('qM').addEventListener('input',onSearch);
+});
+document.getElementById('qM').addEventListener('input',function(e){
+  var q=e.target.value.toLowerCase();
+  filtered=D.filter(function(d){
+    return d.l.toLowerCase().indexOf(q)>-1||d.t.toLowerCase().indexOf(q)>-1||d.p.toLowerCase().indexOf(q)>-1;
+  });
+  render();
+});
 
-/* === Bottom Sheet gesture === */
+/* === Bottom Sheet === */
 var bs=document.getElementById('bs');
 var bsHandle=document.getElementById('bsHandle');
 var bsState='collapsed';
@@ -382,23 +449,19 @@ document.addEventListener('touchend',function(){
   dragging=false;
   bs.style.transition='';
   bs.style.transform='';
-
   var h=getBsHeight();
   var pct=currentTranslate/h;
-
   if(pct<0.25) setBsState('full');
   else if(pct<0.65) setBsState('peek');
   else setBsState('collapsed');
 });
 
-// Tap handle to toggle
 bsHandle.addEventListener('click',function(){
   if(bsState==='collapsed') setBsState('peek');
   else if(bsState==='peek') setBsState('full');
   else setBsState('collapsed');
 });
 
-// Close BS on map tap (mobile)
 map.on('click',function(){
   if(isMobile()&&bsState!=='collapsed') setBsState('collapsed');
 });
