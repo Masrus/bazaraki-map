@@ -7,9 +7,6 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700&family=Material+Symbols+Outlined:opsz,wght,FILL@20..48,100..700,0..1" rel="stylesheet">
-<!-- Firebase -->
-<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database.js"></script>
 <style>
 :root {
   --md-sys-color-primary: #1a6b52;
@@ -275,32 +272,13 @@ const D=[
 {i:'6256108',t:'4-bed apartment',p:'€4,000',l:'Germasogeia',lat:34.69306,lng:33.08058,u:'https://www.bazaraki.com/adv/6256108_4-bedroom-apartment-to-rent/',img:'https://cdn1.bazaraki.com/media/cache1/b6/70/b6707d540ff9b691ac3f268dcf47f51f.webp'}
 ];
 
-// === Firebase Initialization ===
-const firebaseConfig = {
-  apiKey: "AIzaSyDvQnNb-VZQmPyYvhSKDv-YZfXUMHB8dJc",
-  authDomain: "bazaraki-votes.firebaseapp.com",
-  databaseURL: "https://bazaraki-votes-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "bazaraki-votes",
-  storageBucket: "bazaraki-votes.appspot.com",
-  messagingSenderId: "656949693797",
-  appId: "1:656949693797:web:4d7f6eb8c13b973adf5f7c"
-};
-
-firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
-const votesRef = db.ref('votes');
-
-var votes = {};
-
-// Load votes from Firebase
-votesRef.on('value', function(snapshot) {
-  votes = snapshot.val() || {};
-  updateAllVoteButtons();
-  render();
-});
+// LocalStorage для like/dislike (локальное сохранение)
+var votes = JSON.parse(localStorage.getItem('bazaraki_votes') || '{}');
 
 function vote(id, val) {
-  votesRef.child(id).set(val);
+  votes[id] = val;
+  localStorage.setItem('bazaraki_votes', JSON.stringify(votes));
+  updateVoteButtons(id);
 }
 
 function updateVoteButtons(id) {
@@ -315,12 +293,6 @@ function updateVoteButtons(id) {
   dislikeBtns.forEach(function(b) {
     if(v === -1) b.classList.add('disliked');
     else b.classList.remove('disliked');
-  });
-}
-
-function updateAllVoteButtons() {
-  D.forEach(function(d) {
-    updateVoteButtons(d.i);
   });
 }
 
@@ -407,7 +379,9 @@ function render() {
 
   if(markers.length > 0) map.fitBounds(L.featureGroup(markers).getBounds().pad(0.06));
   
-  updateAllVoteButtons();
+  D.forEach(function(d) {
+    updateVoteButtons(d.i);
+  });
 }
 
 function renderList(container, prefix) {
