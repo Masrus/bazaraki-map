@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bazaraki — Избранное на карте</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;font-family:'Inter',system-ui,sans-serif;background:#111}
+
+.wrap{display:flex;height:100vh}
+#map{flex:1}
+
+/* Sidebar */
+.side{width:420px;background:#fff;display:flex;flex-direction:column;z-index:500}
+.side-head{padding:20px 20px 16px;border-bottom:1px solid #f0f0f0;flex-shrink:0}
+.side-head h1{font-size:18px;font-weight:700;color:#111;letter-spacing:-.2px}
+.side-head .meta{font-size:12px;color:#888;margin-top:4px}
+
+.side-search{padding:10px 16px;border-bottom:1px solid #f0f0f0;flex-shrink:0}
+.side-search input{
+  width:100%;padding:9px 12px;border:1px solid #e0e0e0;border-radius:8px;
+  font-size:13px;font-family:inherit;background:#fafafa;transition:all .2s;
+}
+.side-search input:focus{outline:none;border-color:#333;background:#fff}
+
+.side-list{flex:1;overflow-y:auto;padding:8px 12px}
+
+/* Card */
+.c{
+  display:flex;gap:10px;padding:10px;margin-bottom:6px;
+  border-radius:8px;border:1px solid transparent;cursor:pointer;
+  transition:all .12s;
+}
+.c:hover{background:#f7f7f7;border-color:#e0e0e0}
+.c.on{background:#f0f4ff;border-color:#3b82f6}
+
+.c-img{
+  width:80px;height:60px;border-radius:6px;object-fit:cover;flex-shrink:0;background:#f0f0f0;
+}
+.c-body{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center}
+.c-price{font-size:15px;font-weight:700;color:#111}
+.c-price.sale{color:#dc2626}
+.c-type{font-size:11px;color:#666;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.c-loc{font-size:10px;color:#999;margin-top:3px}
+.c-btn{
+  display:inline-block;margin-top:5px;padding:3px 8px;
+  background:#111;color:#fff;text-decoration:none;
+  border-radius:3px;font-size:9px;font-weight:600;letter-spacing:.4px;
+  transition:background .12s;
+}
+.c-btn:hover{background:#333}
+
+/* Popup */
+.leaflet-popup-content-wrapper{border-radius:8px!important;padding:0!important;overflow:hidden;box-shadow:0 6px 24px rgba(0,0,0,.15)!important}
+.leaflet-popup-content{margin:0!important;width:240px!important}
+.leaflet-popup-tip{box-shadow:none!important}
+.p-img{width:100%;height:130px;object-fit:cover;display:block}
+.p-b{padding:10px 12px 12px}
+.p-price{font-size:15px;font-weight:700;color:#111}
+.p-price.sale{color:#dc2626}
+.p-type{font-size:11px;color:#555;margin-top:2px}
+.p-loc{font-size:10px;color:#999;margin-top:5px}
+.p-link{
+  display:block;margin-top:8px;padding:7px 0;text-align:center;
+  background:#111;color:#fff;text-decoration:none;
+  border-radius:4px;font-size:11px;font-weight:600;letter-spacing:.3px;
+  transition:background .12s;
+}
+.p-link:hover{background:#333}
+
+/* Marker */
+.mk{
+  width:32px;height:32px;border-radius:50%;
+  background:#111;border:2.5px solid #fff;
+  box-shadow:0 2px 8px rgba(0,0,0,.3);
+  display:flex;align-items:center;justify-content:center;
+  color:#fff;font-weight:700;font-size:12px;
+  font-family:'Inter',sans-serif;
+  cursor:pointer;transition:transform .12s;
+}
+.mk:hover{transform:scale(1.15)}
+.mk.sale{background:#dc2626}
+
+@media(max-width:768px){
+  .wrap{flex-direction:column}
+  #map{height:55vh}
+  .side{width:100%;height:45vh;border-top:1px solid #e0e0e0}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div id="map"></div>
+  <div class="side">
+    <div class="side-head">
+      <h1>Bazaraki — Избранное</h1>
+      <div class="meta" id="cnt">22 объявления</div>
+    </div>
+    <div class="side-search"><input id="q" type="text" placeholder="Поиск..."></div>
+    <div class="side-list" id="list"></div>
+  </div>
+</div>
+
+<script>
+const D=[
+{i:'6504324',t:'3-bed apartment',p:'€3,600',l:'Agia Triada',lat:34.6794,lng:33.05202,u:'https://www.bazaraki.com/adv/6504324_3-bedroom-apartment-to-rent/',img:'https://cdn1.bazaraki.com/media/cache1/76/0f/760fc02ffa926bc3750a3754d932edb0.webp'},
+{i:'6225334',t:'3-bed apartment',p:'€5,000',l:'Potamos Germasogeias',lat:34.69388,lng:33.08385,u:'https://www.bazaraki.com/adv/6225334_3-bedroom-apartment-to-rent/',img:'https://cdn1.bazaraki.com/media/cache1/18/e7/18e7148bb8a867ca13c04bf5fc63a299.webp'},
+{i:'6449700',t:'3-bed apartment',p:'€2,450',l:'Neapolis',lat:34.69077,lng:33.06731,u:'https://www.bazaraki.com/adv/6449700_3-bedroom-apartment-to-rent/',img:'https://cdn1.bazaraki.com/media/cache1/de/7b/de7b0761f9c7cf121232c7d28e128a2e.webp'},
+{i:'6482947',t:'3-bed apartment',p:'€3,500',l:'Neapolis',lat:34.68862,lng:33.06554,u:'https://www.bazaraki.com/adv/6482947_studio-apartment-to-rent/',img:'https://cdn1.bazaraki.com/media/cache1/35/5e/355ecad3501bbdd9009cf64b7781c9b2.webp'},
+{i:'6430919',t:'3-bed apartment',p:'€1,750',l:'Neapolis',lat:34.68678,lng:33.06254,u:'https://www.bazaraki.com/adv/6430919_3-bedroom-apartment-to-rent/',img:'https://cdn1.bazaraki.com/media/cache1/ec/e8/ece8e513349470798d89e5e701eefd01.webp'},
+{i:'6510036',t:'4-bed apartment',p:'€2,000',l:'Germasogeia Tourist',lat:34.68701,lng:33.06005,u:'https://www.bazaraki.com/adv/6510036_4-bedroom-apartment-to-rent/',img:'https://cdn1.bazaraki.com/media/cache1/d2/2c/d22c4246ec2576f3ffaec12607f28adb.webp'},
+{i:'6472767',t:'3-bed apartment',p:'€2,500',l:'Neapolis',lat:34.68458,lng:33.05977,u:'https://www.bazaraki.com/adv/6472767_3-bedroom-apartment-to-rent/',img:'https://cdn1.bazaraki.com/media/cache1/ad/35/ad3592f37a3c19ffc59358c886214462.webp'},
+{i:'6510005',t:'3-bed apartment',p:'€1,850',l:'Neapolis',lat:34.68502,lng:33.05975,u:'https://www.bazaraki.com/adv/6510005_3-bedroom-apartment-to-rent/',img:'https://cdn1.bazaraki.com/media/cache1/e5/48/e54826b0142548bc9df23462e53e8e7c.webp'},
+{i:'6467931',t:'3-bed penthouse',p:'€4,000',l:'Agia Triada',lat:34.68371,lng:33.05258,u:'https://www.bazaraki.com/adv/6467931_3-bedroom-penthouse-to-rent/',img:'https://cdn1.bazaraki.com/media/cache1/c8/e9/c8e94ff1238fb4403fa37aaaa7943b26.webp'},
+{i:'6306175',t:'3-bed apartment',p:'€1,800',l:'Agia Triada',lat:34.68178,lng:33.05453,u:'https://www.bazaraki.com/adv/6306175_3-bedroom-apartment-to-rent/',img:'https://cdn1.bazaraki.com/media/cache1/00/31/0031c00fd80115650c853edd6b3ec28a.webp'},
+{i:'6122924',t:'3-bed apartment',p:'€2,800',l:'Agia Triada',lat:34.68,lng:33.05255,u:'https://www.bazaraki.com/adv/6122924_2-bedroom-apartment-to-rent/',img:'https://cdn1.bazaraki.com/media/cache1/87/7c/877cbc0c8f81d560b67c73ac98429e9f.webp'},
+{i:'6399139',t:'3-bed apartment',p:'€2,100',l:'Agia Triada',lat:34.67972,lng:33.05264,u:'https://www.bazaraki.com/adv/6399139_3-bedroom-apartment-to-rent/',img:'https://cdn1.bazaraki.com/media/cache1/20/be/20be94e1b1c42c9307993b117add91bd.webp'},
+{i:'6511073',t:'3-bed apartment',p:'€2,500',l:'Agia Triada',lat:34.67878,lng:33.05173,u:'https://www.bazaraki.com/adv/6511073_3-bedroom-apartment-to-rent/',img:'https://cdn1.bazaraki.com/media/cache1/40/39/4039260905b00aec5487457c86c9fad7.webp'},
+{i:'6173440',t:'3-bed apartment',p:'€5,000',l:'Potamos Germasogeias',lat:34.69283,lng:33.08298,u:'https://www.bazaraki.com/adv/6173440_3-bedroom-apartment-to-rent/',img:'https://cdn1.bazaraki.com/media/cache1/5a/d7/5ad734b9388b25e70b82fd49c7800b62.webp'},
+{i:'6005402',t:'3-bed apartment',p:'€6,000',l:'Neapolis',lat:34.68678,lng:33.06417,u:'https://www.bazaraki.com/adv/6005402_3-bedroom-apartment-to-rent/',img:'https://cdn1.bazaraki.com/media/cache1/88/89/88896c0998d3f4d329233f6c086c6fd1.webp'},
+{i:'6456157',t:'3-bed apartment',p:'€2,500',l:'Neapolis',lat:34.68497,lng:33.06011,u:'https://www.bazaraki.com/adv/6456157_3-bedroom-apartment-to-rent/',img:'https://cdn1.bazaraki.com/media/cache1/e3/7a/e37ab319a2d6ff55cedd5dd9e5d93a41.webp'},
+{i:'6201580',t:'3-bed apartment',p:'€3,300',l:'Historical Center',lat:34.68054,lng:33.0527,u:'https://www.bazaraki.com/adv/6201580_3-bedroom-apartment-to-rent/',img:'https://cdn1.bazaraki.com/media/cache1/f0/38/f03809b0d3a39cae127c322ea4457793.webp'},
+{i:'6286583',t:'3-bed apartment',p:'€2,500',l:'Agios Tychon',lat:34.70661,lng:33.12032,u:'https://www.bazaraki.com/adv/6286583_3-bedroom-apartment-to-rent/',img:'https://cdn1.bazaraki.com/media/cache1/3b/82/3b82e013550f281bc829437ce1d8d72a.webp'},
+{i:'6286477',t:'3-bed apartment',p:'€3,000',l:'Limassol Marina',lat:34.68819,lng:33.06777,u:'https://www.bazaraki.com/adv/6286477_3-bedroom-apartment-to-rent/',img:'https://cdn1.bazaraki.com/media/cache1/56/33/56330011c8fff461fc966c255d1e031a.webp'},
+{i:'5774686',t:'3-bed FOR SALE',p:'€430,000',l:'Neapolis',lat:34.68822,lng:33.06673,u:'https://www.bazaraki.com/adv/5774686_3-bedroom-apartment-for-sale/',img:'https://cdn1.bazaraki.com/media/cache1/2d/d9/2dd9c04c745980cb0a06613279d98c79.webp',sale:true},
+{i:'6239433',t:'3-bed apartment',p:'€3,800',l:'Mouttagiaka',lat:34.70724,lng:33.11055,u:'https://www.bazaraki.com/adv/6239433_3-bedroom-apartment-to-rent/',img:'https://cdn1.bazaraki.com/media/cache1/8e/45/8e45394a9e968385e8bfc3a9ad827319.webp'},
+{i:'6256108',t:'4-bed apartment',p:'€4,000',l:'Germasogeia',lat:34.69306,lng:33.08058,u:'https://www.bazaraki.com/adv/6256108_4-bedroom-apartment-to-rent/',img:'https://cdn1.bazaraki.com/media/cache1/b6/70/b6707d540ff9b691ac3f268dcf47f51f.webp'}
+];
+
+const map=L.map('map',{zoomControl:false}).setView([34.688,33.07],13);
+
+L.control.zoom({position:'bottomright'}).addTo(map);
+
+L.tileLayer('https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',{
+  maxZoom:20,attribution:'Google'
+}).addTo(map);
+
+let markers=[];
+let filtered=[...D];
+
+function render(){
+  markers.forEach(m=>map.removeLayer(m));
+  markers=[];
+
+  filtered.forEach((d,idx)=>{
+    const el=document.createElement('div');
+    el.className='mk'+(d.sale?' sale':'');
+    el.textContent=idx+1;
+
+    const icon=L.divIcon({html:el.outerHTML,className:'',iconSize:[32,32],iconAnchor:[16,16],popupAnchor:[0,-20]});
+
+    const popup=L.popup({maxWidth:260,minWidth:240,closeButton:true}).setContent(
+      '<div>'+
+        '<img class="p-img" src="'+d.img+'" onerror="this.style.display=\'none\'">'+
+        '<div class="p-b">'+
+          '<div class="p-price'+(d.sale?' sale':'')+'">'+d.p+'</div>'+
+          '<div class="p-type">'+d.t+'</div>'+
+          '<div class="p-loc">📍 '+d.l+'</div>'+
+          '<a href="'+d.u+'" target="_blank" class="p-link">ОТКРЫТЬ НА BAZARAKI →</a>'+
+        '</div>'+
+      '</div>'
+    );
+
+    const marker=L.marker([d.lat,d.lng],{icon:icon}).addTo(map).bindPopup(popup);
+    marker._d=d;
+
+    marker.on('click',function(){
+      document.querySelectorAll('.c').forEach(function(c){c.classList.remove('on')});
+      const card=document.getElementById('c'+d.i);
+      if(card){card.classList.add('on');card.scrollIntoView({behavior:'smooth',block:'nearest'})}
+    });
+
+    markers.push(marker);
+  });
+
+  // Список
+  const list=document.getElementById('list');
+  list.innerHTML='';
+  document.getElementById('cnt').textContent=filtered.length+' объявлени'+(filtered.length===1?'е':filtered.length<5?'я':'й');
+
+  filtered.forEach(function(d,idx){
+    const card=document.createElement('div');
+    card.className='c';
+    card.id='c'+d.i;
+    card.innerHTML=
+      '<img class="c-img" src="'+d.img+'" onerror="this.style.background=\'#f0f0f0\'">'+
+      '<div class="c-body">'+
+        '<div class="c-price'+(d.sale?' sale':'')+'">'+d.p+'</div>'+
+        '<div class="c-type">'+d.t+'</div>'+
+        '<div class="c-loc">📍 '+d.l+'</div>'+
+        '<a href="'+d.u+'" target="_blank" class="c-btn" onclick="event.stopPropagation()">BAZARAKI →</a>'+
+      '</div>';
+
+    card.addEventListener('click',function(){
+      map.setView([d.lat,d.lng],16,{animate:true});
+      markers[idx].openPopup();
+      document.querySelectorAll('.c').forEach(function(c){c.classList.remove('on')});
+      card.classList.add('on');
+    });
+
+    list.appendChild(card);
+  });
+
+  if(markers.length>0){
+    map.fitBounds(L.featureGroup(markers).getBounds().pad(0.06));
+  }
+}
+
+document.getElementById('q').addEventListener('input',function(e){
+  var q=e.target.value.toLowerCase();
+  filtered=D.filter(function(d){
+    return d.l.toLowerCase().indexOf(q)>-1||d.t.toLowerCase().indexOf(q)>-1||d.p.toLowerCase().indexOf(q)>-1;
+  });
+  render();
+});
+
+render();
+</script>
+</body>
+</html>
